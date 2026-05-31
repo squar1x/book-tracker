@@ -30,7 +30,7 @@ def add_book(books):
     author = input("Автор: ").strip()
     title = input("Название: ").strip()
     
-    # Проверка на дубликаты (автор + название)
+    # Проверка на дубликаты (автор + название, без учёта регистра)
     for book in books:
         if book["author"].lower() == author.lower() and book["title"].lower() == title.lower():
             print("⚠️ Эта книга уже есть в списке!")
@@ -48,7 +48,6 @@ def add_book(books):
     
     date = input("Дата прочтения (например, 2024-01-15): ").strip()
     
-    # Добавляем книгу в список
     new_book = {
         "author": author,
         "title": title,
@@ -71,7 +70,6 @@ def show_books(books):
         return
     
     for idx, book in enumerate(books, start=1):
-        # Звёздочки для визуализации оценки
         stars = "⭐" * book["rating"]
         print(f"{idx}. {book['title']}")
         print(f"   👤 {book['author']} | {stars} ({book['rating']}/5) | 📅 {book['date_read']}")
@@ -90,7 +88,6 @@ def show_avg_rating(books):
     total = sum(book["rating"] for book in books)
     average = total / len(books)
     
-    # Визуализация средней оценки
     stars = "⭐" * round(average)
     print(f"Всего книг: {len(books)}")
     print(f"Средняя оценка: {average:.2f} {stars}")
@@ -106,13 +103,10 @@ def show_author_stats(books):
         print("📭 Нет книг для статистики.")
         return
     
-    # Считаем количество книг на автора
     authors = [book["author"] for book in books]
     stats = Counter(authors)
     
-    # Сортируем по количеству (убывание) и выводим
     for author, count in stats.most_common():
-        # Рисуем мини-гистограмму
         bar = "▮" * count
         print(f"{author}: {bar} ({count})")
     
@@ -121,9 +115,35 @@ def show_author_stats(books):
 
 
 def delete_book(books):
-    """Заглушка: функция удаления будет реализована в другой ветке."""
+    """Удаляет книгу по номеру из списка."""
     print("\n🗑️ Удаление книги")
-    print("⚠️ Эта функция будет доступна после слияния ветки feature/delete")
+    print("-" * 60)
+    
+    if not books:
+        print("📭 Список пуст. Нечего удалять.")
+        return books
+    
+    # Показываем текущий список, чтобы пользователь видел номера
+    show_books(books)
+    
+    try:
+        choice = input("\nВведите номер книги для удаления (или 'q' для отмены): ").strip()
+        if choice.lower() == 'q':
+            print("❌ Отмена удаления.")
+            return books
+        
+        idx = int(choice) - 1
+        if 0 <= idx < len(books):
+            removed_book = books.pop(idx)
+            save_books(books)
+            print(f"✅ Книга '{removed_book['title']}' успешно удалена!")
+        else:
+            print("❌ Неверный номер. Такой книги нет в списке.")
+    except ValueError:
+        print("❌ Пожалуйста, введите корректное число.")
+    except Exception as e:
+        print(f"❌ Произошла ошибка: {e}")
+        
     return books
 
 
@@ -146,7 +166,6 @@ def main():
     """Главная функция: загружает данные и запускает цикл меню."""
     print("👋 Добро пожаловать в Трекер книг!")
     
-    # Загружаем книги при старте
     books = load_books()
     
     while True:
@@ -168,11 +187,10 @@ def main():
         else:
             print("❌ Неверный выбор. Пожалуйста, введите число от 1 до 6.")
         
-        # Пауза перед возвратом в меню (чтобы пользователь успел прочитать вывод)
+        # Пауза перед возвратом в меню
         if choice != "6":
             input("\nНажмите Enter, чтобы продолжить...")
 
 
-# Точка входа в программу
 if __name__ == "__main__":
     main()
